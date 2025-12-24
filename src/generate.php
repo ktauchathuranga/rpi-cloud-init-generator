@@ -50,10 +50,23 @@ function generateUserData($data) {
         $yaml .= "hostname: " .  escapeYamlString($data['local_hostname']) . "\n\n";
     }
     
+    // Manage /etc/hosts
+    if (isset($data['manage_etc_hosts']) && $data['manage_etc_hosts']) {
+        $yaml .= "manage_etc_hosts: true\n\n";
+    }
+    
+    // SSH Enable - This is the key setting! 
+    if (isset($data['enable_ssh']) && $data['enable_ssh']) {
+        $yaml .= "ssh:\n";
+        $yaml .= "  install_server: true\n";
+        $yaml .= "  enabled: true\n";
+        $yaml .= "  allow_public_ssh_keys: true\n\n";
+    }
+    
     // Users configuration
     $yaml .= "users:\n";
     $yaml .= "  - name: " . escapeYamlString($data['username'] ?? 'pi') . "\n";
-    $yaml .= "    groups:  [adm, dialout, cdrom, sudo, audio, video, plugdev, games, users, input, netdev, spi, i2c, gpio]\n";
+    $yaml .= "    groups: [adm, dialout, cdrom, sudo, audio, video, plugdev, games, users, input, netdev, spi, i2c, gpio]\n";
     $yaml .= "    shell: /bin/bash\n";
     
     // Sudo configuration
@@ -77,7 +90,7 @@ function generateUserData($data) {
             $yaml .= "    ssh_authorized_keys:\n";
             foreach ($keys as $key) {
                 $key = trim($key);
-                if (! empty($key)) {
+                if (!empty($key)) {
                     $yaml .= "      - " . escapeYamlString($key) . "\n";
                 }
             }
@@ -92,7 +105,7 @@ function generateUserData($data) {
         $yaml .= "  expire: false\n";
         $yaml .= "  users:\n";
         $yaml .= "    - name: " .  escapeYamlString($data['username'] ?? 'pi') . "\n";
-        $yaml .= "      password: " . escapeYamlString($data['password']) . "\n";
+        $yaml .= "      password: " .  escapeYamlString($data['password']) . "\n";
         $yaml .= "      type: text\n";
         $yaml .= "\n";
     }
@@ -105,7 +118,7 @@ function generateUserData($data) {
     }
     
     // Timezone
-    if (!empty($data['timezone'])) {
+    if (! empty($data['timezone'])) {
         $yaml .= "timezone: " . escapeYamlString($data['timezone']) . "\n\n";
     }
     
@@ -129,24 +142,92 @@ function generateUserData($data) {
         $yaml .= "package_upgrade: true\n";
     }
     
-    // Additional packages
+    // Collect all packages
+    $allPackages = [];
+    
+    // Add avahi-daemon if manage_etc_hosts is enabled (for . local hostname resolution)
+    if (isset($data['manage_etc_hosts']) && $data['manage_etc_hosts']) {
+        $allPackages[] = 'avahi-daemon';
+    }
+    
+    // Add openssh-server if SSH is enabled
+    if (isset($data['enable_ssh']) && $data['enable_ssh']) {
+        $allPackages[] = 'openssh-server';
+    }
+    
+    // Additional packages from user
     if (!empty($data['packages'])) {
-        $packages = array_filter(explode("\n", trim($data['packages'])));
-        if (!empty($packages)) {
-            $yaml .= "\npackages:\n";
-            foreach ($packages as $package) {
-                $package = trim($package);
-                if (!empty($package)) {
-                    $yaml .= "  - " . escapeYamlString($package) . "\n";
-                }
+        $userPackages = array_filter(explode("\n", trim($data['packages'])));
+        foreach ($userPackages as $package) {
+            $package = trim($package);
+            if (!empty($package) && !in_array($package, $allPackages)) {
+                $allPackages[] = $package;
             }
+        }
+    }
+    
+    if (! empty($allPackages)) {
+        $yaml .= "\npackages:\n";
+        foreach ($allPackages as $package) {
+            $yaml .= "  - " . escapeYamlString($package) . "\n";
         }
     }
     
     $yaml .= "\n";
     
+    // Raspberry Pi specific configuration
+    $hasRpiConfig = false;
+    $rpiYaml = "rpi:\n";
+    
+    // Interfaces
+    $hasInterfaces = false;
+    $interfacesYaml = "  interfaces:\n";
+    
+    if (isset($data['rpi_serial']) && $data['rpi_serial']) {
+        $interfacesYaml .= "    serial: true\n";
+        $hasInterfaces = true;
+    }
+    if (isset($data['rpi_i2c']) && $data['rpi_i2c']) {
+        $interfacesYaml .= "    i2c: true\n";
+        $hasInterfaces = true;
+    }
+    if (isset($data['rpi_spi']) && $data['rpi_spi']) {
+        $interfacesYaml .= "    spi: true\n";
+        $hasInterfaces = true;
+    }
+    if (isset($data['rpi_onewire']) && $data['rpi_onewire']) {
+        $interfacesYaml .= "    one_wire: true\n";
+        $hasInterfaces = true;
+    }
+    if (isset($data['rpi_rgpio']) && $data['rpi_rgpio']) {
+        $interfacesYaml .= "    remote_gpio: true\n";
+        $hasInterfaces = true;
+    }
+    
+    if ($hasInterfaces) {
+        $rpiYaml .= $interfacesYaml;
+        $hasRpiConfig = true;
+    }
+    
+    // GPU Memory
+    if (! empty($data['rpi_gpu_mem'])) {
+        $rpiYaml .= "  gpu_mem: " . intval($data['rpi_gpu_mem']) . "\n";
+        $hasRpiConfig = true;
+    }
+    
+    // Camera
+    if (isset($data['rpi_camera']) && $data['rpi_camera']) {
+        $rpiYaml .= "  camera:\n";
+        $rpiYaml .= "    enabled: true\n";
+        $hasRpiConfig = true;
+    }
+    
+    if ($hasRpiConfig) {
+        $yaml .= $rpiYaml .  "\n";
+    }
+    
     // Write files
-    if (!empty($data['write_files'])) {
+    if (! empty($data['write_files'])) {
         $files = json_decode($data['write_files'], true);
         if (!empty($files)) {
             $yaml .= "write_files:\n";
@@ -157,7 +238,7 @@ function generateUserData($data) {
                         $yaml .= "    permissions: \"" . $file['permissions'] . "\"\n";
                     }
                     if (!empty($file['owner'])) {
-                        $yaml .= "    owner: " . escapeYamlString($file['owner']) . "\n";
+                        $yaml .= "    owner: " .  escapeYamlString($file['owner']) . "\n";
                     }
                     $yaml .= "    content: |\n";
                     $contentLines = explode("\n", $file['content']);
@@ -170,13 +251,25 @@ function generateUserData($data) {
         }
     }
     
-    // Run commands - Add network activation commands for WiFi
+    // Run commands
     $runcmdItems = [];
+    
+    // Enable SSH if requested
+    $enableSsh = isset($data['enable_ssh']) && $data['enable_ssh'];
+    if ($enableSsh) {
+        $runcmdItems[] = "systemctl enable ssh";
+        $runcmdItems[] = "systemctl start ssh";
+    }
+    
+    // Enable avahi-daemon for .local resolution
+    if (isset($data['manage_etc_hosts']) && $data['manage_etc_hosts']) {
+        $runcmdItems[] = "systemctl enable avahi-daemon";
+        $runcmdItems[] = "systemctl start avahi-daemon";
+    }
     
     // Check if WiFi is enabled and add necessary commands
     $hasWifi = isset($data['wifi_enabled']) && $data['wifi_enabled'];
     if ($hasWifi) {
-        // These commands help ensure WiFi comes up properly
         $runcmdItems[] = "rfkill unblock wifi";
         $runcmdItems[] = "netplan apply";
     }
@@ -200,7 +293,7 @@ function generateUserData($data) {
     
     // Final message
     if (!empty($data['final_message'])) {
-        $yaml .= "final_message: " . escapeYamlString($data['final_message']) . "\n\n";
+        $yaml .= "final_message: " .  escapeYamlString($data['final_message']) . "\n\n";
     }
     
     // Power state
@@ -251,7 +344,7 @@ function generateNetworkConfig($data) {
             
             if (!empty($data['eth_gateway'])) {
                 $yaml .= "      routes:\n";
-                $yaml .= "        - to: default\n";
+                $yaml .= "        - to:  default\n";
                 $yaml .= "          via: " . $data['eth_gateway'] . "\n";
             }
             
@@ -294,13 +387,13 @@ function generateNetworkConfig($data) {
                 $yaml .= "          via: " . $data['wifi_gateway'] . "\n";
             }
             
-            if (! empty($data['wifi_dns'])) {
+            if (!empty($data['wifi_dns'])) {
                 $dnsServers = array_map('trim', explode(',', $data['wifi_dns']));
                 $yaml .= "      nameservers:\n";
                 $yaml .= "        addresses:\n";
                 foreach ($dnsServers as $dns) {
-                    if (! empty($dns)) {
-                        $yaml .= "          - " . $dns . "\n";
+                    if (!empty($dns)) {
+                        $yaml .= "          - " .  $dns . "\n";
                     }
                 }
             }
@@ -310,7 +403,7 @@ function generateNetworkConfig($data) {
             $yaml .= "      optional: true\n";
         }
         
-        // Regulatory domain for WiFi (important for some countries/networks)
+        // Regulatory domain for WiFi
         if (!empty($data['wifi_country'])) {
             $yaml .= "      regulatory-domain: " . strtoupper($data['wifi_country']) . "\n";
         }
@@ -324,12 +417,9 @@ function generateNetworkConfig($data) {
             $isOpenNetwork = isset($data['wifi_open_network']) && $data['wifi_open_network'];
             
             if ($isOpenNetwork) {
-                // Open network - no authentication needed
-                // Some versions need explicit empty, some need nothing
                 $yaml .= "          auth:\n";
                 $yaml .= "            key-management: none\n";
             } elseif (! empty($data['wifi_password'])) {
-                // WPA/WPA2 password protected network
                 $yaml .= "          password: \"" . addslashes($data['wifi_password']) . "\"\n";
             }
         }
@@ -365,11 +455,11 @@ if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
     $zip->close();
     
     $hostname = preg_replace('/[^a-zA-Z0-9-_]/', '', $_POST['local_hostname'] ?? 'raspberrypi');
-    $filename = 'cloud-init-' . $hostname . '-' . date('Y-m-d') . '.zip';
+    $filename = 'cloud-init-' . $hostname .  '-' . date('Y-m-d') . '.zip';
     
     header('Content-Type: application/zip');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Content-Length: ' .  filesize($zipFile));
+    header('Content-Disposition: attachment; filename="' .  $filename . '"');
+    header('Content-Length: ' . filesize($zipFile));
     header('Cache-Control: no-cache, must-revalidate');
     header('Pragma: no-cache');
     
