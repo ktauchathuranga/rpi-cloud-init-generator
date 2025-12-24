@@ -1,9 +1,9 @@
 services:
-  cloud-init-generator:
+  rpi-cloud-init-generator:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cloud-init-generator
+    container_name: rpi-cloud-init-generator
     ports:
       - "8080:80"
     volumes:

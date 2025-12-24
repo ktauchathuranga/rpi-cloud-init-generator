@@ -27,8 +27,11 @@ COPY nginx.conf /etc/nginx/http.d/default.conf
 RUN mkdir -p /etc/supervisor.d
 RUN echo -e "[supervisord]\nnodaemon=true\nlogfile=/dev/null\nlogfile_maxbytes=0\nuser=root\n\n[program:nginx]\ncommand=nginx -g 'daemon off;'\nautostart=true\nautorestart=true\nstdout_logfile=/dev/stdout\nstdout_logfile_maxbytes=0\nstderr_logfile=/dev/stderr\nstderr_logfile_maxbytes=0\n\n[program:php-fpm]\ncommand=php-fpm -F\nautostart=true\nautorestart=true\nstdout_logfile=/dev/stdout\nstdout_logfile_maxbytes=0\nstderr_logfile=/dev/stderr\nstderr_logfile_maxbytes=0" > /etc/supervisor.d/supervisord.ini
 
-# Set working directory and fix permissions
+# Set working directory
 WORKDIR /var/www/html
+
+# Copy application source files into the image
+COPY ./src /var/www/html
 
 # Create necessary directories and set permissions
 RUN mkdir -p /var/www/html /var/tmp/nginx /var/lib/nginx/logs \
