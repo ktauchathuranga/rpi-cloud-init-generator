@@ -16,7 +16,11 @@ RUN docker-php-ext-install opcache zip
 RUN echo "upload_max_filesize = 10M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Copy nginx config
+# Configure nginx user in main config
+RUN sed -i 's/user nginx;/user nginx;/g' /etc/nginx/nginx.conf || \
+    sed -i '1i user nginx;' /etc/nginx/nginx.conf
+
+# Copy nginx site config
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 # Create supervisord config
@@ -27,8 +31,8 @@ RUN echo -e "[supervisord]\nnodaemon=true\nlogfile=/dev/null\nlogfile_maxbytes=0
 WORKDIR /var/www/html
 
 # Create necessary directories and set permissions
-RUN mkdir -p /var/www/html \
-    && chown -R nginx:nginx /var/www/html \
+RUN mkdir -p /var/www/html /var/tmp/nginx /var/lib/nginx/logs \
+    && chown -R nginx:nginx /var/www/html /var/tmp/nginx /var/lib/nginx \
     && chmod -R 755 /var/www/html
 
 # Expose port
