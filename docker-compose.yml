@@ -1,0 +1,13 @@
+services:
+  cloud-init-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloud-init-generator
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
