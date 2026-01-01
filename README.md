@@ -1,4 +1,4 @@
-# RPi Cloud-Init Generator
+# cloud-init Generator for Raspberry Pi OS
 
 This project provides a simple web interface to generate `cloud-init` files (`meta-data`, `network-config`, `user-data`) for Raspberry Pi OS. It allows users to easily configure Wi-Fi, users, and other settings without using the official Raspberry Pi Imager customization option.  
 
