@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileCount++;
         const fileEntry = document.createElement('div');
         fileEntry.className = 'file-entry';
-        fileEntry. innerHTML = `
+        fileEntry.innerHTML = `
             <div class="file-entry-header">
                 <h4>File #${fileCount}</h4>
                 <button type="button" class="btn btn-danger remove-file-btn">Remove</button>
@@ -65,11 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Ethernet toggle
-    const ethEnabled = document. getElementById('eth_enabled');
+    const ethEnabled = document.getElementById('eth_enabled');
     const ethConfig = document.getElementById('eth-config');
 
     ethEnabled.addEventListener('change', function() {
-        ethConfig. style.display = this.checked ?  'block' : 'none';
+        ethConfig.style.display = this.checked ?  'block' : 'none';
     });
 
     // Ethernet DHCP toggle
@@ -81,11 +81,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // WiFi toggle
-    const wifiEnabled = document. getElementById('wifi_enabled');
+    const wifiEnabled = document.getElementById('wifi_enabled');
     const wifiConfig = document.getElementById('wifi-config');
 
     wifiEnabled.addEventListener('change', function() {
-        wifiConfig. style.display = this.checked ?  'block' : 'none';
+        wifiConfig.style.display = this.checked ?  'block' : 'none';
     });
 
     // WiFi DHCP toggle
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const wifiStaticConfig = document.getElementById('wifi-static-config');
 
     wifiDhcp4.addEventListener('change', function() {
-        wifiStaticConfig.style.display = this. checked ? 'none' : 'block';
+        wifiStaticConfig.style.display = this.checked ? 'none' : 'block';
     });
 
     // WiFi Open Network toggle
@@ -101,10 +101,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const wifiPasswordGroup = document.getElementById('wifi-password-group');
     const wifiPasswordField = document.getElementById('wifi_password');
 
-    wifiOpenNetwork. addEventListener('change', function() {
+    wifiOpenNetwork.addEventListener('change', function() {
         if (this.checked) {
             wifiPasswordGroup.style.display = 'none';
-            wifiPasswordField. value = '';
+            wifiPasswordField.value = '';
             wifiPasswordField.disabled = true;
         } else {
             wifiPasswordGroup.style.display = 'block';
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.set('write_files', JSON.stringify(writeFilesData));
 
         try {
-            const response = await fetch('generate. php? preview=true', {
+            const response = await fetch('generate.php?preview=true', {
                 method:  'POST',
                 body:  formData
             });
@@ -187,11 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 modal.style.display = 'block';
             } else {
-                alert('Error generating preview.  Please check your input.');
+                alert('Error generating preview. Please check your input.');
             }
         } catch (error) {
             console.error('Preview error:', error);
-            alert('Error generating preview. Please try again.');
+            alert('Error generating preview.Please try again.');
         }
     });
 
@@ -206,9 +206,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Tab switching
-    tabBtns. forEach(btn => {
+    tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            const targetTab = this. dataset.tab;
+            const targetTab = this.dataset.tab;
             
             tabBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     document.addEventListener('keydown', function(e) {
         // Escape to close modal
-        if (e. key === 'Escape' && modal.style.display === 'block') {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
             modal.style.display = 'none';
         }
         

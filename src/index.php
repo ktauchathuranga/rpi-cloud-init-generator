@@ -9,14 +9,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>🍓 Raspberry Pi Cloud-Init Generator</h1>
+            <h1>Raspberry Pi Cloud-Init Generator</h1>
             <p>Generate cloud-init configuration files for your Raspberry Pi OS</p>
         </header>
 
         <form id="cloud-init-form" method="POST" action="generate.php">
             <!-- Meta Data Section -->
             <section class="form-section">
-                <h2>📋 Meta Data</h2>
+                <h2>Meta Data</h2>
                 <div class="form-group">
                     <label for="instance_id">Instance ID:</label>
                     <input type="text" id="instance_id" name="instance_id" value="raspberry-pi-001" required>
@@ -38,7 +38,7 @@
 
             <!-- SSH Configuration Section -->
             <section class="form-section">
-                <h2>🔐 SSH Configuration</h2>
+                <h2>SSH Configuration</h2>
                 
                 <div class="form-group checkbox-group">
                     <label>
@@ -65,7 +65,7 @@
 
             <!-- User Data Section -->
             <section class="form-section">
-                <h2>👤 User Configuration</h2>
+                <h2>User Configuration</h2>
                 
                 <div class="form-group">
                     <label for="username">Username:</label>
@@ -95,7 +95,7 @@
 
             <!-- System Configuration -->
             <section class="form-section">
-                <h2>⚙️ System Configuration</h2>
+                <h2>System Configuration</h2>
                 
                 <div class="form-group">
                     <label for="timezone">Timezone:</label>
@@ -148,7 +148,7 @@
 
             <!-- Raspberry Pi Hardware Configuration -->
             <section class="form-section">
-                <h2>🔧 Raspberry Pi Hardware</h2>
+                <h2>Raspberry Pi Hardware</h2>
                 
                 <fieldset class="network-fieldset">
                     <legend>Interfaces</legend>
@@ -216,7 +216,7 @@
 
             <!-- Network Configuration Section -->
             <section class="form-section">
-                <h2>🌐 Network Configuration</h2>
+                <h2>Network Configuration</h2>
                 
                 <div class="form-group checkbox-group">
                     <label>
@@ -372,7 +372,7 @@
 
             <!-- Run Commands Section -->
             <section class="form-section">
-                <h2>🖥️ Run Commands</h2>
+                <h2>Run Commands</h2>
                 <div class="form-group">
                     <label for="runcmd">Additional commands to run on first boot:</label>
                     <textarea id="runcmd" name="runcmd" rows="5" placeholder="echo 'Hello World'&#10;apt install -y neofetch"></textarea>
@@ -382,7 +382,7 @@
 
             <!-- Write Files Section -->
             <section class="form-section">
-                <h2>📝 Write Files</h2>
+                <h2>Write Files</h2>
                 <div id="write-files-container">
                     <!-- Dynamic file entries will be added here -->
                 </div>
@@ -391,7 +391,7 @@
 
             <!-- Final Message -->
             <section class="form-section">
-                <h2>📢 Final Message</h2>
+                <h2>Final Message</h2>
                 <div class="form-group">
                     <label for="final_message">Message to display after cloud-init completes:</label>
                     <textarea id="final_message" name="final_message" rows="2">Cloud-init completed!  System is ready after $UPTIME seconds.</textarea>
@@ -400,7 +400,7 @@
 
             <!-- Power State -->
             <section class="form-section">
-                <h2>🔌 Power State</h2>
+                <h2>Power State</h2>
                 <div class="form-group">
                     <label for="power_state">After configuration: </label>
                     <select id="power_state" name="power_state">
@@ -412,8 +412,8 @@
             </section>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">📥 Download Cloud-Init Files</button>
-                <button type="button" id="preview-btn" class="btn btn-secondary">👁️ Preview YAML</button>
+                <button type="submit" class="btn btn-primary">Download Cloud-Init Files</button>
+                <button type="button" id="preview-btn" class="btn btn-secondary">Preview YAML</button>
             </div>
         </form>
 
