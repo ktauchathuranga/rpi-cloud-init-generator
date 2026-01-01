@@ -96,6 +96,17 @@
             <!-- System Configuration -->
             <section class="form-section">
                 <h2>System Configuration</h2>
+
+                <div class="form-group checkbox-group" style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <label>
+        <input type="checkbox" id="offline_mode" name="offline_mode">
+        <strong>Offline Mode (Air-gapped)</strong>
+    </label>
+    <small style="color: #ffc107; display: block; margin-top: 5px;">
+        Prevents all package installation attempts (apt-get). <br>
+        Essential for booting without internet. Assumes OpenSSH is pre-installed.
+    </small>
+</div>
                 
                 <div class="form-group">
                     <label for="timezone">Timezone:</label>

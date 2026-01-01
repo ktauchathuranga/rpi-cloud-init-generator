@@ -46,8 +46,8 @@ function generateUserData($data) {
     $yaml = "#cloud-config\n\n";
     
     // Hostname
-    if (! empty($data['local_hostname'])) {
-        $yaml .= "hostname: " .  escapeYamlString($data['local_hostname']) . "\n\n";
+    if (!empty($data['local_hostname'])) {
+        $yaml .= "hostname: " . escapeYamlString($data['local_hostname']) . "\n\n";
     }
     
     // Manage /etc/hosts
@@ -55,7 +55,7 @@ function generateUserData($data) {
         $yaml .= "manage_etc_hosts: true\n\n";
     }
     
-    // SSH Enable - This is the key setting! 
+    // SSH Enable
     if (isset($data['enable_ssh']) && $data['enable_ssh']) {
         $yaml .= "ssh:\n";
         $yaml .= "  install_server: true\n";
@@ -84,7 +84,7 @@ function generateUserData($data) {
     }
     
     // SSH authorized keys
-    if (! empty($data['ssh_authorized_keys'])) {
+    if (!empty($data['ssh_authorized_keys'])) {
         $keys = array_filter(explode("\n", trim($data['ssh_authorized_keys'])));
         if (!empty($keys)) {
             $yaml .= "    ssh_authorized_keys:\n";
@@ -100,12 +100,12 @@ function generateUserData($data) {
     $yaml .= "\n";
     
     // Password configuration
-    if (! empty($data['password'])) {
+    if (!empty($data['password'])) {
         $yaml .= "chpasswd:\n";
         $yaml .= "  expire: false\n";
         $yaml .= "  users:\n";
-        $yaml .= "    - name: " .  escapeYamlString($data['username'] ?? 'pi') . "\n";
-        $yaml .= "      password: " .  escapeYamlString($data['password']) . "\n";
+        $yaml .= "    - name: " . escapeYamlString($data['username'] ?? 'pi') . "\n";
+        $yaml .= "      password: " . escapeYamlString($data['password']) . "\n";
         $yaml .= "      type: text\n";
         $yaml .= "\n";
     }
@@ -118,12 +118,12 @@ function generateUserData($data) {
     }
     
     // Timezone
-    if (! empty($data['timezone'])) {
+    if (!empty($data['timezone'])) {
         $yaml .= "timezone: " . escapeYamlString($data['timezone']) . "\n\n";
     }
     
     // Locale
-    if (! empty($data['locale'])) {
+    if (!empty($data['locale'])) {
         $yaml .= "locale: " . escapeYamlString($data['locale']) . "\n\n";
     }
     
@@ -133,47 +133,63 @@ function generateUserData($data) {
         $yaml .= "  layout: " . escapeYamlString($data['keyboard_layout']) . "\n\n";
     }
     
-    // Package management
-    if (isset($data['package_update']) && $data['package_update']) {
-        $yaml .= "package_update: true\n";
-    }
+    // ============================================
+    // START OF MODIFIED PACKAGE LOGIC
+    // ============================================
     
-    if (isset($data['package_upgrade']) && $data['package_upgrade']) {
-        $yaml .= "package_upgrade: true\n";
-    }
-    
-    // Collect all packages
-    $allPackages = [];
-    
-    // Add avahi-daemon if manage_etc_hosts is enabled (for . local hostname resolution)
-    if (isset($data['manage_etc_hosts']) && $data['manage_etc_hosts']) {
-        $allPackages[] = 'avahi-daemon';
-    }
-    
-    // Add openssh-server if SSH is enabled
-    if (isset($data['enable_ssh']) && $data['enable_ssh']) {
-        $allPackages[] = 'openssh-server';
-    }
-    
-    // Additional packages from user
-    if (!empty($data['packages'])) {
-        $userPackages = array_filter(explode("\n", trim($data['packages'])));
-        foreach ($userPackages as $package) {
-            $package = trim($package);
-            if (!empty($package) && !in_array($package, $allPackages)) {
-                $allPackages[] = $package;
+    // Check if offline mode is requested
+    $isOffline = isset($data['offline_mode']) && $data['offline_mode'];
+
+    // Package management (ONLY if NOT offline)
+    if (!$isOffline) {
+        if (isset($data['package_update']) && $data['package_update']) {
+            $yaml .= "package_update: true\n";
+        }
+        
+        if (isset($data['package_upgrade']) && $data['package_upgrade']) {
+            $yaml .= "package_upgrade: true\n";
+        }
+        
+        // Collect all packages
+        $allPackages = [];
+        
+        // Add avahi-daemon if manage_etc_hosts is enabled (for .local hostname resolution)
+        if (isset($data['manage_etc_hosts']) && $data['manage_etc_hosts']) {
+            $allPackages[] = 'avahi-daemon';
+        }
+        
+        // Add openssh-server if SSH is enabled
+        if (isset($data['enable_ssh']) && $data['enable_ssh']) {
+            $allPackages[] = 'openssh-server';
+        }
+        
+        // Additional packages from user
+        if (!empty($data['packages'])) {
+            $userPackages = array_filter(explode("\n", trim($data['packages'])));
+            foreach ($userPackages as $package) {
+                $package = trim($package);
+                if (!empty($package) && !in_array($package, $allPackages)) {
+                    $allPackages[] = $package;
+                }
             }
         }
-    }
-    
-    if (! empty($allPackages)) {
-        $yaml .= "\npackages:\n";
-        foreach ($allPackages as $package) {
-            $yaml .= "  - " . escapeYamlString($package) . "\n";
+        
+        if (!empty($allPackages)) {
+            $yaml .= "\npackages:\n";
+            foreach ($allPackages as $package) {
+                $yaml .= "  - " . escapeYamlString($package) . "\n";
+            }
         }
+    } else {
+        // If Offline Mode is ON, add a comment explaining why packages are missing
+        $yaml .= "# Offline mode enabled: Package installation skipped to prevent boot hang.\n";
     }
     
     $yaml .= "\n";
+    
+    // ============================================
+    // END OF MODIFIED PACKAGE LOGIC
+    // ============================================
     
     // Raspberry Pi specific configuration
     $hasRpiConfig = false;
@@ -210,7 +226,7 @@ function generateUserData($data) {
     }
     
     // GPU Memory
-    if (! empty($data['rpi_gpu_mem'])) {
+    if (!empty($data['rpi_gpu_mem'])) {
         $rpiYaml .= "  gpu_mem: " . intval($data['rpi_gpu_mem']) . "\n";
         $hasRpiConfig = true;
     }
@@ -223,22 +239,22 @@ function generateUserData($data) {
     }
     
     if ($hasRpiConfig) {
-        $yaml .= $rpiYaml .  "\n";
+        $yaml .= $rpiYaml . "\n";
     }
     
     // Write files
-    if (! empty($data['write_files'])) {
+    if (!empty($data['write_files'])) {
         $files = json_decode($data['write_files'], true);
         if (!empty($files)) {
             $yaml .= "write_files:\n";
             foreach ($files as $file) {
-                if (! empty($file['path']) && !empty($file['content'])) {
+                if (!empty($file['path']) && !empty($file['content'])) {
                     $yaml .= "  - path: " . escapeYamlString($file['path']) . "\n";
                     if (!empty($file['permissions'])) {
                         $yaml .= "    permissions: \"" . $file['permissions'] . "\"\n";
                     }
                     if (!empty($file['owner'])) {
-                        $yaml .= "    owner: " .  escapeYamlString($file['owner']) . "\n";
+                        $yaml .= "    owner: " . escapeYamlString($file['owner']) . "\n";
                     }
                     $yaml .= "    content: |\n";
                     $contentLines = explode("\n", $file['content']);
@@ -293,11 +309,11 @@ function generateUserData($data) {
     
     // Final message
     if (!empty($data['final_message'])) {
-        $yaml .= "final_message: " .  escapeYamlString($data['final_message']) . "\n\n";
+        $yaml .= "final_message: " . escapeYamlString($data['final_message']) . "\n\n";
     }
     
     // Power state
-    if (! empty($data['power_state']) && $data['power_state'] !== 'none') {
+    if (!empty($data['power_state']) && $data['power_state'] !== 'none') {
         $yaml .= "power_state:\n";
         $yaml .= "  mode: " . $data['power_state'] . "\n";
         $yaml .= "  message: \"System is " . ($data['power_state'] === 'reboot' ? 'rebooting' : 'shutting down') . " after cloud-init\"\n";

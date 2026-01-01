@@ -255,4 +255,40 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         }
     });
+
+    // ============================================
+// Offline Mode Logic
+// ============================================
+const offlineMode = document.getElementById('offline_mode');
+const pkgUpdate = document.getElementById('package_update');
+const pkgUpgrade = document.getElementById('package_upgrade');
+const packagesArea = document.getElementById('packages');
+
+offlineMode.addEventListener('change', function() {
+    if (this.checked) {
+        // Disable update/upgrade checkboxes
+        pkgUpdate.checked = false;
+        pkgUpdate.disabled = true;
+        
+        pkgUpgrade.checked = false;
+        pkgUpgrade.disabled = true;
+        
+        // Disable custom packages text area
+        packagesArea.disabled = true;
+        packagesArea.dataset.originalPlaceholder = packagesArea.placeholder;
+        packagesArea.placeholder = "Package installation disabled in Offline Mode";
+        packagesArea.value = ""; // Clear it
+    } else {
+        // Re-enable controls
+        pkgUpdate.disabled = false;
+        pkgUpdate.checked = true; // Restore default recommended state
+        
+        pkgUpgrade.disabled = false;
+        
+        packagesArea.disabled = false;
+        if (packagesArea.dataset.originalPlaceholder) {
+            packagesArea.placeholder = packagesArea.dataset.originalPlaceholder;
+        }
+    }
+});
 });
