@@ -304,6 +304,45 @@ header p {
     display: block;
 }
 
+/* Sponsor Section */
+.sponsor-section {
+    background: linear-gradient(135deg, rgba(193, 53, 132, 0.15), rgba(131, 58, 180, 0.15));
+    border-radius: 12px;
+    padding: 35px 25px;
+    margin: 40px 0;
+    border: 1px solid rgba(193, 53, 132, 0.3);
+    text-align: center;
+}
+
+.sponsor-content h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.sponsor-content p {
+    color: #ccc;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+}
+
+.sponsor-content .sponsor-subtitle {
+    color: #999;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.sponsor-card-wrapper {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.sponsor-card-wrapper iframe {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
 footer {
     text-align: center;
     padding: 30px 20px;

@@ -446,6 +446,18 @@
             </div>
         </div>
 
+        <!-- Sponsor Section -->
+        <section class="sponsor-section">
+            <div class="sponsor-content">
+                <h2>💖 Support This Project</h2>
+                <p>If you find this tool helpful, consider sponsoring me to keep it alive and add new features!</p>
+                <p class="sponsor-subtitle">Your support helps cover hosting costs and motivates continued development.</p>
+                <div class="sponsor-card-wrapper">
+                    <iframe src="https://github.com/sponsors/ktauchathuranga/card" title="Sponsor ktauchathuranga" height="225" width="600" style="border: 0;"></iframe>
+                </div>
+            </div>
+        </section>
+
         <footer>
             <p>Generated files should be placed on the boot partition of your Raspberry Pi SD card.</p>
             <p>Files:  <code>meta-data</code>, <code>user-data</code>, <code>network-config</code> → <code>/boot/firmware/</code></p>
